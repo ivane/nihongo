@@ -29,7 +29,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .word-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1rem}
 @media(max-width:680px){
   .word-grid{column-count:2;column-gap:.6rem;display:block}
-  .word-card{break-inside:avoid;margin-bottom:.6rem}
+  .word-card{break-inside:avoid;margin-bottom:.6rem;width:100%}
 }
 .word-card{background:var(--card);border-radius:16px;padding:1.2rem;border-left:4px solid var(--accent);transition:.3s}
 .word-card:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,.3)}
