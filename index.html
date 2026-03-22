@@ -26,7 +26,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .cat-btn{padding:.35rem .9rem;border-radius:20px;cursor:pointer;border:1px solid var(--accent2);background:transparent;color:var(--dim);font-size:.8rem;transition:.2s;white-space:nowrap}
 .cat-btn:hover,.cat-btn.active{background:var(--accent2);color:var(--text);border-color:var(--accent2)}
 .cat-btn .cat-count{font-size:.7rem;opacity:.7;margin-left:.2rem}
-.word-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem}
+.word-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1rem}
 @media(max-width:768px){
   body{padding:.5rem}
   .header{padding:1rem 0;margin-bottom:1rem}
@@ -78,8 +78,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .word-card .related .rel-word:hover{text-decoration:underline}
 .word-card .related .rel-diff{color:var(--dim);font-size:.82rem;margin-top:.3rem}
 .word-card .date{color:var(--dim);font-size:.75rem;margin-top:.5rem;text-align:right}
-.word-card .expand-btn{display:none;background:none;border:1px dashed var(--dim);color:var(--dim);width:100%;padding:.3rem 0;border-radius:8px;cursor:pointer;font-size:.75rem;margin-top:.4rem;transition:.2s}
-.word-card .expand-btn:hover{border-color:var(--text);color:var(--text)}
 .empty{text-align:center;padding:3rem;color:var(--dim);font-size:1.1rem}
 table.word-table{width:100%;border-collapse:collapse;font-size:.9rem}
 table.word-table thead{position:sticky;top:0;z-index:1}
@@ -333,9 +331,7 @@ function renderList() {
   } else {
     document.getElementById('wordGrid').style.display = 'grid';
     document.getElementById('wordTable').style.display = 'none';
-  grid.innerHTML = sorted.map(w => {
-    const catEmoji = (w.category||'').match(/^(.)\s/)?.[1] || '📝';
-    return `
+  grid.innerHTML = sorted.map(w => `
     <div class="word-card">
       <div class="top-row">
         <div class="kanji">${w.kanji}</div>
@@ -344,13 +340,11 @@ function renderList() {
       <div class="reading">${w.kana || w.reading}</div>
       <div class="romaji">${w.romaji||''}</div>
       <div class="meaning">${w.meaning} ${w.category?`<span style="font-size:.7rem;padding:1px 6px;border-radius:8px;background:rgba(255,255,255,.1);margin-left:.3rem">${w.category}</span>`:''}</div>
-      <div class="xhs-cover" style="display:none"><span class="xhs-emoji">${catEmoji}</span><span class="kanji">${w.kanji}</span><button class="speak-btn" onclick="speak('${w.kanji}')" title="朗读">🔊</button></div>
-      <div class="xhs-body" style="display:none"><div class="reading">${w.kana || w.reading}</div><div class="romaji">${w.romaji||''}</div><div class="meaning">${w.meaning}</div></div>
       <div class="examples">${renderExamples(w.examples || w.example)}</div>
       ${w.related ? `<div class="related"><span class="rel-word" onclick="document.getElementById('searchInput').value='${w.related.word}';renderList()">🔗 ${w.related.word}（${w.related.kana}）</span><div class="rel-diff">${w.related.difference}</div></div>` : ''}
-      <button class="expand-btn" onclick="this.parentElement.classList.toggle('expanded')">📖 展开例句</button>
       <div class="date">${w.added||''}</div>
-    </div>`}).join('');
+    </div>
+  `).join('');
   }
 }
 
