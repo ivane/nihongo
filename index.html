@@ -229,9 +229,14 @@ function speak(text) {
 }
 
 // 単語データ読み込み
+let wordsHash = '';
 async function loadWords() {
   const resp = await fetch('words.json');
-  words = await resp.json();
+  const data = await resp.json();
+  const hash = JSON.stringify(data);
+  if (hash === wordsHash) return;
+  wordsHash = hash;
+  words = data;
   renderList();
 }
 
@@ -561,7 +566,7 @@ function updateScore() {
 }
 
 loadWords();
-setInterval(loadWords, 5000);
+setInterval(loadWords, 30000);
 </script>
 </body>
 </html>
