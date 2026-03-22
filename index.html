@@ -49,11 +49,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .word-card .related .rel-word:hover{text-decoration:underline}
 .word-card .related .rel-diff{color:var(--dim);font-size:.82rem;margin-top:.3rem}
 .word-card .date{color:var(--dim);font-size:.75rem;margin-top:.5rem;text-align:right}
-.word-card .more-examples{display:none}
-.word-card .more-btn{background:none;border:1px dashed rgba(255,255,255,.15);color:var(--dim);width:100%;padding:.3rem 0;border-radius:8px;cursor:pointer;font-size:.78rem;margin-top:.3rem;transition:.2s}
-.word-card .more-btn:hover{border-color:var(--dim);color:var(--text)}
-.word-card.expanded .more-examples{display:flex}
-.word-card.expanded .more-btn{display:none}
+.word-card .ex-carousel{position:relative;margin-bottom:.5rem}
+.word-card .ex-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:.4rem;padding-bottom:.3rem;scrollbar-width:none;-ms-overflow-style:none}
+.word-card .ex-track::-webkit-scrollbar{display:none}
+.word-card .ex-track .example{min-width:calc(100% - .4rem);scroll-snap-align:start;flex-shrink:0}
+.word-card .ex-dots{display:flex;gap:.3rem;justify-content:center;margin-top:.3rem}
+.word-card .ex-dot{width:6px;height:6px;border-radius:50%;background:var(--dim);opacity:.3;cursor:pointer;transition:.2s}
+.word-card .ex-dot.active{opacity:1;background:var(--accent)}
 .empty{text-align:center;padding:3rem;color:var(--dim);font-size:1.1rem}
 table.word-table{width:100%;border-collapse:collapse;font-size:.9rem}
 table.word-table thead{position:sticky;top:0;z-index:1}
@@ -243,7 +245,7 @@ function switchTab(tab) {
 
 // 例句HTML生成
 function escJp(s){return s.replace(/'/g,"\\'").replace(/\n/g,'')}
-function renderExamples(examples) {
+function renderExamples(examples,cardIdx) {
   if (!examples) return '';
   const arr = Array.isArray(examples) ? examples : [examples];
   const renderOne = (e) => `
@@ -253,9 +255,17 @@ function renderExamples(examples) {
       <div class="cn">${e.cn}</div>
     </div>`;
   if (arr.length <= 1) return arr.map(renderOne).join('');
-  const first = arr[Math.floor(Math.random() * arr.length)];
-  const rest = arr.filter(e => e !== first);
-  return renderOne(first) + `<div class="more-examples">${rest.map(renderOne).join('')}</div>` + `<button class="more-btn" onclick="this.closest('.word-card').classList.add('expanded')">还有 ${rest.length} 个例句 ▾</button>`;
+  const id = 'ex'+cardIdx;
+  const dots = arr.map((_,i) => `<span class="ex-dot${i===0?' active':''}" onclick="document.getElementById('${id}').scrollTo({left:document.getElementById('${id}').offsetWidth*${i},behavior:'smooth'})"></span>`).join('');
+  setTimeout(()=>{
+    const track = document.getElementById(id);
+    if(!track)return;
+    track.onscroll = () => {
+      const idx = Math.round(track.scrollLeft / track.offsetWidth);
+      track.parentElement.querySelectorAll('.ex-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+    };
+  },100);
+  return `<div class="ex-carousel"><div class="ex-track" id="${id}">${arr.map(renderOne).join('')}</div><div class="ex-dots">${dots}</div></div>`;
 }
 
 // 分類フィルタ
@@ -305,7 +315,7 @@ function renderList() {
   } else {
     document.getElementById('wordGrid').style.display = 'grid';
     document.getElementById('wordTable').style.display = 'none';
-  grid.innerHTML = sorted.map(w => `
+  grid.innerHTML = sorted.map((w,i) => `
     <div class="word-card">
       <div class="top-row">
         <div class="kanji">${w.kanji}</div>
@@ -314,7 +324,7 @@ function renderList() {
       <div class="reading">${w.kana || w.reading}</div>
       <div class="romaji">${w.romaji||''}</div>
       <div class="meaning">${w.meaning} ${w.category?`<span style="font-size:.7rem;padding:1px 6px;border-radius:8px;background:rgba(255,255,255,.1);margin-left:.3rem">${w.category}</span>`:''}</div>
-      <div class="examples">${renderExamples(w.examples || w.example)}</div>
+      <div class="examples">${renderExamples(w.examples || w.example, i)}</div>
       ${w.related ? `<div class="related"><span class="rel-word" onclick="document.getElementById('searchInput').value='${w.related.word}';renderList()">🔗 ${w.related.word}（${w.related.kana}）</span><div class="rel-diff">${w.related.difference}</div></div>` : ''}
       <div class="date">${w.added||''}</div>
     </div>
