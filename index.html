@@ -255,7 +255,7 @@ function renderExamples(examples) {
   if (arr.length <= 1) return arr.map(renderOne).join('');
   const first = arr[Math.floor(Math.random() * arr.length)];
   const rest = arr.filter(e => e !== first);
-  return renderOne(first) + `<div class="more-examples">${rest.map(renderOne).join('')}</div>` + `<button class="more-btn" onclick="this.parentElement.classList.add('expanded')">还有 ${rest.length} 个例句 ▾</button>`;
+  return renderOne(first) + `<div class="more-examples">${rest.map(renderOne).join('')}</div>` + `<button class="more-btn" onclick="this.closest('.word-card').classList.add('expanded')">还有 ${rest.length} 个例句 ▾</button>`;
 }
 
 // 分類フィルタ
