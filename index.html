@@ -298,11 +298,11 @@ function showTtsSettings() {
       <div style="background:var(--card);border-radius:16px;padding:1.5rem;width:340px;max-width:90vw;box-shadow:var(--shadow-hover)">
         <h3 style="margin-bottom:1rem;font-size:1rem">🔊 TTS 设置</h3>
         <label style="display:block;margin-bottom:.5rem;font-size:.85rem;color:var(--text-secondary)">引擎</label>
-        <select id="ttsEngine" onchange="ttsConfig.engine=this.value;localStorage.setItem('ttsEngine',this.value);document.getElementById('azureFields').style.display=this.value==='azure'?'block':'none'" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);margin-bottom:1rem">
-          <option value="native" ${!isAzure?'selected':''}>本地 TTS（免费）</option>
-          <option value="azure" ${isAzure?'selected':''}>Azure TTS（高质量·需 Key）</option>
+        <select id="ttsEngine" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);margin-bottom:1rem">
+          <option value="native">本地 TTS（免费）</option>
+          <option value="azure">Azure TTS（高质量·需 Key）</option>
         </select>
-        <div id="azureFields" style="display:${isAzure?'block':'none'}">
+        <div id="azureFields" style="display:none">
           <p style="font-size:.75rem;color:var(--green);margin-bottom:.5rem">✅ Azure 每月 50 万字符免费</p>
           <label style="display:block;margin-bottom:.5rem;font-size:.85rem;color:var(--text-secondary)">API Key</label>
           <input type="password" id="azureKeyInput" value="${ttsConfig.azureKey}" placeholder="粘贴 Azure API Key" onchange="ttsConfig.azureKey=this.value;localStorage.setItem('ttsAzureKey',this.value)" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);margin-bottom:.5rem">
@@ -320,6 +320,17 @@ function showTtsSettings() {
     </div>`;
   panel.querySelector('div').classList.add('tts-panel-body');
   document.body.appendChild(panel);
+  
+  // Add event listener after panel is in DOM
+  const engineSelect = document.getElementById('ttsEngine');
+  engineSelect.value = ttsConfig.engine;
+  engineSelect.addEventListener('change', function() {
+    ttsConfig.engine = this.value;
+    localStorage.setItem('ttsEngine', this.value);
+    document.getElementById('azureFields').style.display = this.value === 'azure' ? 'block' : 'none';
+  });
+  // Show/hide based on current engine
+  document.getElementById('azureFields').style.display = ttsConfig.engine === 'azure' ? 'block' : 'none';
 }
 window.showTtsSettings = showTtsSettings;
 
