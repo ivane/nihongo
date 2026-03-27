@@ -134,7 +134,7 @@ table.word-table .td-related:hover{opacity:.7}
 .next-btn:hover{background:var(--accent-hover);transform:translateY(-2px);box-shadow:0 4px 16px rgba(91,91,214,.35)}
 .skip-btn{padding:.55rem 1.3rem;border-radius:var(--radius-pill);border:1.5px solid var(--border);background:transparent;color:var(--dim);cursor:pointer;font-size:.85rem;transition:all .2s;margin-top:.5rem}
 .skip-btn:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
-@media(max-width:640px){body{padding:.7rem}.header h1{font-size:1.65rem}.word-grid{grid-template-columns:1fr}.quiz-card{padding:1.6rem 1.2rem}.quiz-card .prompt{font-size:1.7rem}.controls{gap:.4rem}.cat-btn{padding:.35rem .75rem;font-size:.78rem}#themeBtn{top:.7rem;right:.7rem;padding:.35rem .8rem}.score-bar{gap:1.5rem}}
+@media(max-width:640px){body{padding:.7rem}.header h1{font-size:1.65rem}.word-grid{grid-template-columns:1fr}.quiz-card{padding:1.6rem 1.2rem}.quiz-card .prompt{font-size:1.7rem}.controls{gap:.4rem}.cat-btn{padding:.35rem .75rem;font-size:.78rem}#themeBtn{top:.7rem;right:.7rem;padding:.35rem .8rem}#ttsBtn{top:.7rem;right:5.2rem;padding:.3rem .6rem;font-size:.8rem}.score-bar{gap:1.5rem}}
 @media(max-width:400px){.header h1{font-size:1.4rem}.tab{padding:.55rem 1.2rem;font-size:.88rem}.quiz-card .prompt{font-size:1.5rem}}
 </style>
 </head>
@@ -144,6 +144,7 @@ table.word-table .td-related:hover{opacity:.7}
   <h1>🇯🇵 日本語単語帳</h1>
   <p>多邻国学日语的好帮手</p>
   <button id="themeBtn" onclick="app.toggleTheme()">🌙 暗色</button>
+  <button id="ttsBtn" onclick="showTtsSettings()" style="position:fixed;top:1rem;right:6.5rem;padding:.4rem .75rem;border-radius:var(--radius-pill);border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:.85rem;z-index:99;box-shadow:var(--shadow);transition:all .2s">🔊 TTS</button>
 </div>
 
 <div class="tabs">
@@ -211,7 +212,104 @@ const $ = id => document.getElementById(id);
 function escHtml(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function shuffle(arr){return[...arr].sort(()=>Math.random()-.5);}
 function debounce(fn,ms){let t;return function(...a){clearTimeout(t);t=setTimeout(()=>fn.apply(this,a),ms);};}
-function speak(text){if(!('speechSynthesis' in window))return;const u=new SpeechSynthesisUtterance(text);u.lang='ja-JP';u.rate=.8;speechSynthesis.cancel();speechSynthesis.speak(u);}
+// TTS Engine - supports native and Azure TTS
+let ttsConfig = { engine: 'native', rate: 0.85, pitch: 1.0, azureKey: '', azureRegion: 'eastus' };
+let nativeVoice = null;
+
+// Initialize TTS - find best Japanese voice
+function initTTS() {
+  if (!('speechSynthesis' in window)) return;
+  const loadVoices = () => {
+    const voices = speechSynthesis.getVoices();
+    // Prefer specific Japanese voices by quality
+    const prefs = ['Google 日本語', 'Microsoft Haruka', 'Microsoft Nanami', 'Yuna', 'Ichiro', 'Japanese'];
+    for (const pref of prefs) {
+      nativeVoice = voices.find(v => v.lang.includes('ja') && v.name.includes(pref));
+      if (nativeVoice) break;
+    }
+    nativeVoice = nativeVoice || voices.find(v => v.lang.includes('ja')) || null;
+  };
+  loadVoices();
+  speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+// Speak text
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  if (ttsConfig.engine === 'azure' && ttsConfig.azureKey) {
+    speakAzure(text);
+  } else {
+    speakNative(text);
+  }
+}
+
+function speakNative(text) {
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ja-JP';
+  u.rate = ttsConfig.rate;
+  u.pitch = ttsConfig.pitch;
+  if (nativeVoice) u.voice = nativeVoice;
+  speechSynthesis.speak(u);
+}
+
+// Azure TTS via REST API
+async function speakAzure(text) {
+  const tokenUrl = `https://eastus.api.cognitive.microsoft.com/sts/v1.0/issueToken`;
+  try {
+    const tokenRes = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: { 'Ocp-Apim-Subscription-Key': ttsConfig.azureKey, 'Content-Type': 'application/x-www-form-urlencoded' }
+    });
+    const token = await tokenRes.text();
+    const region = ttsConfig.azureRegion || 'eastus';
+    const ssml = `<speak version='1.0' xml:lang='ja-JP'><voice name='ja-JP-NanamiNeural'>${escSsml(text)}</voice></speak>`;
+    const audioRes = await fetch(`https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/ssml+xml', 'Ocp-Apim-Subscription-Region': region },
+      body: ssml
+    });
+    if (audioRes.ok) {
+      const blob = await audioRes.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audio.play();
+      audio.onended = () => URL.revokeObjectURL(url);
+    } else {
+      speakNative(text); // fallback
+    }
+  } catch (e) {
+    speakNative(text); // fallback on error
+  }
+}
+
+function escSsml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// Show TTS settings panel
+function showTtsSettings() {
+  const panel = document.createElement('div');
+  panel.id = 'ttsPanel';
+  panel.innerHTML = `
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;display:flex;align-items:center;justify-content:center" onclick="if(event.target===this)this.remove()">
+      <div style="background:var(--card);border-radius:16px;padding:1.5rem;width:320px;max-width:90vw;box-shadow:var(--shadow-hover)">
+        <h3 style="margin-bottom:1rem;font-size:1rem">🔊 TTS 设置</h3>
+        <label style="display:block;margin-bottom:.5rem;font-size:.85rem;color:var(--text-secondary)">引擎</label>
+        <select id="ttsEngine" onchange="ttsConfig.engine=this.value" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);margin-bottom:1rem">
+          <option value="native" ${ttsConfig.engine==='native'?'selected':''}>本地 TTS（推荐）</option>
+          <option value="azure" ${ttsConfig.engine==='azure'?'selected':''}>Azure TTS（需 API Key）</option>
+        </select>
+        <div id="azureFields" style="display:${ttsConfig.engine==='azure'?'block':'none'}">
+          <label style="display:block;margin-bottom:.5rem;font-size:.85rem;color:var(--text-secondary)">Azure API Key</label>
+          <input type="password" id="azureKeyInput" value="${ttsConfig.azureKey}" placeholder="输入 Azure API Key" onchange="ttsConfig.azureKey=this.value" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);margin-bottom:.5rem">
+          <a href="https://portal.azure.com/" target="_blank" style="font-size:.75rem;color:var(--accent)">获取 Azure TTS Key →</a>
+        </div>
+        <label style="display:block;margin-bottom:.5rem;font-size:.85rem;color:var(--text-secondary)">语速: <span id="rateVal">${ttsConfig.rate}</span></label>
+        <input type="range" min="0.5" max="1.5" step="0.05" value="${ttsConfig.rate}" onchange="ttsConfig.rate=parseFloat(this.value);document.getElementById('rateVal').textContent=this.value" style="width:100%;margin-bottom:1rem">
+        <button onclick="document.getElementById('ttsPanel').remove();speak('すしを食べたいです')" style="width:100%;padding:.6rem;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer">🎤 测试朗读</button>
+      </div>
+    </div>`;
+  document.body.appendChild(panel);
+}
 
 /* ---- 五十音 ---- */
 const GOJUON={
@@ -484,6 +582,7 @@ window.app=app;
 if(localStorage.getItem('theme')==='dark'){document.body.classList.add('dark');$('themeBtn').textContent='☀️ 亮色';}
 const dr=debounce(()=>app.renderList(),200);
 $('searchInput').addEventListener('input',dr);
+initTTS();
 app.loadWords();
 setInterval(()=>app.loadWords(),30000);
 })();
