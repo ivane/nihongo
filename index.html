@@ -212,8 +212,14 @@ const $ = id => document.getElementById(id);
 function escHtml(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function shuffle(arr){return[...arr].sort(()=>Math.random()-.5);}
 function debounce(fn,ms){let t;return function(...a){clearTimeout(t);t=setTimeout(()=>fn.apply(this,a),ms);};}
-// TTS Engine - native browser TTS
-let ttsConfig = { rate: parseFloat(localStorage.getItem('ttsRate')) || 0.85, pitch: parseFloat(localStorage.getItem('ttsPitch')) || 1.0 };
+// TTS Engine - supports native browser TTS and Azure TTS
+let ttsConfig = {
+  engine: localStorage.getItem('ttsEngine') || 'native',
+  rate: parseFloat(localStorage.getItem('ttsRate')) || 0.85,
+  pitch: parseFloat(localStorage.getItem('ttsPitch')) || 1.0,
+  azureKey: localStorage.getItem('ttsAzureKey') || '',
+  azureRegion: localStorage.getItem('ttsAzureRegion') || 'eastus'
+};
 let nativeVoice = null;
 
 // Initialize TTS - find best Japanese voice
@@ -221,7 +227,6 @@ function initTTS() {
   if (!('speechSynthesis' in window)) return;
   const loadVoices = () => {
     const voices = speechSynthesis.getVoices();
-    // Prefer specific Japanese voices by quality
     const prefs = ['Google 日本語', 'Microsoft Haruka', 'Microsoft Nanami', 'Yuna', 'Ichiro', 'Japanese'];
     for (const pref of prefs) {
       nativeVoice = voices.find(v => v.lang.includes('ja') && v.name.includes(pref));
@@ -236,6 +241,14 @@ function initTTS() {
 // Speak text
 function speak(text) {
   if (!('speechSynthesis' in window)) return;
+  if (ttsConfig.engine === 'azure' && ttsConfig.azureKey) {
+    speakAzure(text);
+  } else {
+    speakNative(text);
+  }
+}
+
+function speakNative(text) {
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = 'ja-JP';
@@ -245,28 +258,67 @@ function speak(text) {
   speechSynthesis.speak(u);
 }
 
+// Azure TTS via REST API
+async function speakAzure(text) {
+  const tokenUrl = `https://${ttsConfig.azureRegion}.api.cognitive.microsoft.com/sts/v1.0/issueToken`;
+  try {
+    const tokenRes = await fetch(tokenUrl, {
+      method: 'POST',
+      headers: { 'Ocp-Apim-Subscription-Key': ttsConfig.azureKey, 'Content-Type': 'application/x-www-form-urlencoded' }
+    });
+    if (!tokenRes.ok) { speakNative(text); return; }
+    const token = await tokenRes.text();
+    const ssml = `<speak version='1.0' xml:lang='ja-JP'><voice name='ja-JP-NanamiNeural'>${text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</voice></speak>`;
+    const audioRes = await fetch(`https://${ttsConfig.azureRegion}.tts.speech.microsoft.com/cognitiveservices/v1`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/ssml+xml', 'Ocp-Apim-Subscription-Region': ttsConfig.azureRegion },
+      body: ssml
+    });
+    if (audioRes.ok) {
+      const blob = await audioRes.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audio.play();
+      audio.onended = () => URL.revokeObjectURL(url);
+    } else {
+      speakNative(text);
+    }
+  } catch (e) {
+    speakNative(text);
+  }
+}
+
 // Show TTS settings panel
 function showTtsSettings() {
   const panel = document.createElement('div');
   panel.id = 'ttsPanel';
+  const isAzure = ttsConfig.engine === 'azure';
   panel.innerHTML = `
     <div style="position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;display:flex;align-items:center;justify-content:center" onclick="if(event.target===this)this.remove()">
-      <div style="background:var(--card);border-radius:16px;padding:1.5rem;width:320px;max-width:90vw;box-shadow:var(--shadow-hover)">
+      <div style="background:var(--card);border-radius:16px;padding:1.5rem;width:340px;max-width:90vw;box-shadow:var(--shadow-hover)">
         <h3 style="margin-bottom:1rem;font-size:1rem">🔊 TTS 设置</h3>
-        <p style="font-size:.8rem;color:var(--text-secondary);margin-bottom:1rem">使用浏览器内置语音，如需更好效果请安装日语语音包：</p>
-        <div style="background:var(--accent2);padding:.8rem;border-radius:10px;margin-bottom:1rem">
-          <p style="font-size:.8rem;color:var(--text);margin-bottom:.5rem">🌐 Chrome 日语语音安装</p>
-          <p style="font-size:.75rem;color:var(--text-secondary);margin-bottom:.5rem">Mac: 系统偏好设置 → 辅助功能 → 语音 → 选择日语语音</p>
-          <p style="font-size:.75rem;color:var(--text-secondary);margin-bottom:.5rem">Windows: 设置 → 时间与语言 → 语音 → 添加日语语音</p>
-          <a href="https://support.google.com/chrome/answer/9489193" target="_blank" style="font-size:.75rem;color:var(--accent)">Chrome 语音设置教程 →</a>
+        <label style="display:block;margin-bottom:.5rem;font-size:.85rem;color:var(--text-secondary)">引擎</label>
+        <select id="ttsEngine" onchange="ttsConfig.engine=this.value;localStorage.setItem('ttsEngine',this.value);document.getElementById('azureFields').style.display=this.value==='azure'?'block':'none'" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);margin-bottom:1rem">
+          <option value="native" ${!isAzure?'selected':''}>本地 TTS（免费）</option>
+          <option value="azure" ${isAzure?'selected':''}>Azure TTS（高质量·需 Key）</option>
+        </select>
+        <div id="azureFields" style="display:${isAzure?'block':'none'}">
+          <p style="font-size:.75rem;color:var(--green);margin-bottom:.5rem">✅ Azure 每月 50 万字符免费</p>
+          <label style="display:block;margin-bottom:.5rem;font-size:.85rem;color:var(--text-secondary)">API Key</label>
+          <input type="password" id="azureKeyInput" value="${ttsConfig.azureKey}" placeholder="粘贴 Azure API Key" onchange="ttsConfig.azureKey=this.value;localStorage.setItem('ttsAzureKey',this.value)" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);margin-bottom:.5rem">
+          <label style="display:block;margin-bottom:.5rem;font-size:.85rem;color:var(--text-secondary)">Region</label>
+          <input type="text" id="azureRegionInput" value="${ttsConfig.azureRegion}" placeholder="eastus" onchange="ttsConfig.azureRegion=this.value;localStorage.setItem('ttsAzureRegion',this.value)" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);margin-bottom:.5rem">
+          <a href="https://portal.azure.com/" target="_blank" style="font-size:.75rem;color:var(--accent)">获取 Azure TTS Key →</a>
         </div>
         <label style="display:block;margin-bottom:.5rem;font-size:.85rem;color:var(--text-secondary)">语速: <span id="rateVal">${ttsConfig.rate}</span></label>
         <input type="range" min="0.5" max="1.5" step="0.05" value="${ttsConfig.rate}" onchange="ttsConfig.rate=parseFloat(this.value);localStorage.setItem('ttsRate',this.value);document.getElementById('rateVal').textContent=this.value" style="width:100%;margin-bottom:1rem">
         <label style="display:block;margin-bottom:.5rem;font-size:.85rem;color:var(--text-secondary)">音调: <span id="pitchVal">${ttsConfig.pitch}</span></label>
         <input type="range" min="0.5" max="2" step="0.05" value="${ttsConfig.pitch}" onchange="ttsConfig.pitch=parseFloat(this.value);localStorage.setItem('ttsPitch',this.value);document.getElementById('pitchVal').textContent=this.value" style="width:100%;margin-bottom:1rem">
-        <button onclick="document.getElementById('ttsPanel').remove();speak('すしを食べたいです')" style="width:100%;padding:.6rem;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer">🎤 测试朗读</button>
+        <button onclick="speak('すしを食べたいです')" style="width:100%;padding:.6rem;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;margin-bottom:.5rem">🎤 测试朗读</button>
+        <button onclick="this.closest('.tts-panel-body').style.display='none';document.getElementById('ttsPanel').remove()" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);cursor:pointer">关闭</button>
       </div>
     </div>`;
+  panel.querySelector('div').classList.add('tts-panel-body');
   document.body.appendChild(panel);
 }
 window.showTtsSettings = showTtsSettings;
