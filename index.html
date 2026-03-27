@@ -213,7 +213,7 @@ function escHtml(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').r
 function shuffle(arr){return[...arr].sort(()=>Math.random()-.5);}
 function debounce(fn,ms){let t;return function(...a){clearTimeout(t);t=setTimeout(()=>fn.apply(this,a),ms);};}
 // TTS Engine - supports native and Azure TTS
-let ttsConfig = { engine: 'native', rate: 0.85, pitch: 1.0, azureKey: '', azureRegion: 'eastus' };
+let ttsConfig = { engine: localStorage.getItem('ttsEngine') || 'native', rate: parseFloat(localStorage.getItem('ttsRate')) || 0.85, pitch: parseFloat(localStorage.getItem('ttsPitch')) || 1.0, azureKey: localStorage.getItem('ttsAzureKey') || '', azureRegion: localStorage.getItem('ttsAzureRegion') || 'eastus' };
 let nativeVoice = null;
 
 // Initialize TTS - find best Japanese voice
@@ -294,17 +294,21 @@ function showTtsSettings() {
       <div style="background:var(--card);border-radius:16px;padding:1.5rem;width:320px;max-width:90vw;box-shadow:var(--shadow-hover)">
         <h3 style="margin-bottom:1rem;font-size:1rem">🔊 TTS 设置</h3>
         <label style="display:block;margin-bottom:.5rem;font-size:.85rem;color:var(--text-secondary)">引擎</label>
-        <select id="ttsEngine" onchange="ttsConfig.engine=this.value" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);margin-bottom:1rem">
+        <select id="ttsEngine" onchange="ttsConfig.engine=this.value;localStorage.setItem('ttsEngine',this.value);document.getElementById('azureFields').style.display=this.value==='azure'?'block':'none'" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);margin-bottom:1rem">
           <option value="native" ${ttsConfig.engine==='native'?'selected':''}>本地 TTS（推荐）</option>
           <option value="azure" ${ttsConfig.engine==='azure'?'selected':''}>Azure TTS（需 API Key）</option>
         </select>
         <div id="azureFields" style="display:${ttsConfig.engine==='azure'?'block':'none'}">
           <label style="display:block;margin-bottom:.5rem;font-size:.85rem;color:var(--text-secondary)">Azure API Key</label>
-          <input type="password" id="azureKeyInput" value="${ttsConfig.azureKey}" placeholder="输入 Azure API Key" onchange="ttsConfig.azureKey=this.value" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);margin-bottom:.5rem">
+          <input type="password" id="azureKeyInput" value="${ttsConfig.azureKey}" placeholder="输入 Azure API Key" onchange="ttsConfig.azureKey=this.value;localStorage.setItem('ttsAzureKey',this.value)" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);margin-bottom:.5rem">
+          <label style="display:block;margin-bottom:.5rem;font-size:.85rem;color:var(--text-secondary)">Region</label>
+          <input type="text" id="azureRegionInput" value="${ttsConfig.azureRegion}" placeholder="eastus" onchange="ttsConfig.azureRegion=this.value;localStorage.setItem('ttsAzureRegion',this.value)" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);margin-bottom:.5rem">
           <a href="https://portal.azure.com/" target="_blank" style="font-size:.75rem;color:var(--accent)">获取 Azure TTS Key →</a>
         </div>
         <label style="display:block;margin-bottom:.5rem;font-size:.85rem;color:var(--text-secondary)">语速: <span id="rateVal">${ttsConfig.rate}</span></label>
-        <input type="range" min="0.5" max="1.5" step="0.05" value="${ttsConfig.rate}" onchange="ttsConfig.rate=parseFloat(this.value);document.getElementById('rateVal').textContent=this.value" style="width:100%;margin-bottom:1rem">
+        <input type="range" min="0.5" max="1.5" step="0.05" value="${ttsConfig.rate}" onchange="ttsConfig.rate=parseFloat(this.value);localStorage.setItem('ttsRate',this.value);document.getElementById('rateVal').textContent=this.value" style="width:100%;margin-bottom:1rem">
+        <label style="display:block;margin-bottom:.5rem;font-size:.85rem;color:var(--text-secondary)">音调: <span id="pitchVal">${ttsConfig.pitch}</span></label>
+        <input type="range" min="0.5" max="2" step="0.05" value="${ttsConfig.pitch}" onchange="ttsConfig.pitch=parseFloat(this.value);localStorage.setItem('ttsPitch',this.value);document.getElementById('pitchVal').textContent=this.value" style="width:100%;margin-bottom:1rem">
         <button onclick="document.getElementById('ttsPanel').remove();speak('すしを食べたいです')" style="width:100%;padding:.6rem;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer">🎤 测试朗读</button>
       </div>
     </div>`;
