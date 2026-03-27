@@ -295,10 +295,10 @@ function showTtsSettings() {
         <h3 style="margin-bottom:1rem;font-size:1rem">🔊 TTS 设置</h3>
         <label style="display:block;margin-bottom:.5rem;font-size:.85rem;color:var(--text-secondary)">引擎</label>
         <select id="ttsEngine" onchange="ttsConfig.engine=this.value;localStorage.setItem('ttsEngine',this.value);document.getElementById('azureFields').style.display=this.value==='azure'?'block':'none'" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);margin-bottom:1rem">
-          <option value="native" ${ttsConfig.engine==='native'?'selected':''}>本地 TTS（推荐）</option>
-          <option value="azure" ${ttsConfig.engine==='azure'?'selected':''}>Azure TTS（需 API Key）</option>
+          <option value="native" selected>本地 TTS（推荐）</option>
+          <option value="azure">Azure TTS（需 API Key）</option>
         </select>
-        <div id="azureFields" style="display:${ttsConfig.engine==='azure'?'block':'none'}">
+        <div id="azureFields" style="display:none">
           <label style="display:block;margin-bottom:.5rem;font-size:.85rem;color:var(--text-secondary)">Azure API Key</label>
           <input type="password" id="azureKeyInput" value="${ttsConfig.azureKey}" placeholder="输入 Azure API Key" onchange="ttsConfig.azureKey=this.value;localStorage.setItem('ttsAzureKey',this.value)" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);margin-bottom:.5rem">
           <label style="display:block;margin-bottom:.5rem;font-size:.85rem;color:var(--text-secondary)">Region</label>
