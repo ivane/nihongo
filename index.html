@@ -466,7 +466,7 @@ localStorage.setItem('theme',isDark?'dark':'light');
 
 async loadWords(){
 try{
-const resp=await fetch('words.json');
+const resp=await fetch('words.json?v='+(Date.now()>>1800000));
 if(!resp.ok)throw new Error('HTTP '+resp.status);
 const data=await resp.json();
 const hash=JSON.stringify(data);
