@@ -546,7 +546,7 @@ if(this.activeCategory!=='全部')filtered=filtered.filter(w=>(w.category||'其�
 $('statsText').textContent=this.words.length+' 词';
 if(!filtered.length){$('wordGrid').innerHTML='';$('wordGrid').style.display='none';$('wordTable').style.display='none';$('emptyMsg').style.display='block';return;}
 $('emptyMsg').style.display='none';
-const sorted=[...filtered].sort((a,b)=>(b.added||'').localeCompare(a.added||''));
+const sorted=[...filtered].map((w,i)=>({...w,_idx:i})).sort((a,b)=>{const d=(b.added||'').localeCompare(a.added||'');return d!==0?d:b._idx-a._idx;});
 if(this.viewMode==='table'){
 $('wordGrid').style.display='none';$('wordTable').style.display='table';
 const tbody=$('wordTableBody');const frag=document.createDocumentFragment();
