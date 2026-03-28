@@ -522,7 +522,7 @@ return carousel;
 
 renderCatFilter(){
 const catCounts={};
-this.words.forEach(w=>{const c=w.category||'其他';catCounts[c]=(catCounts[c]||0)+1;});
+this.words.forEach(w=>{(Array.isArray(w.category)?w.category:[w.category||'其他']).forEach(c=>{catCounts[c]=(catCounts[c]||0)+1;});});
 const ALL_CATS=['全部','📅 日期','🔢 数字','🚌 交通','✈️ 旅游必懂','🍜 食物','👔 日常','📦 其他'];
 const frag=document.createDocumentFragment();
 ALL_CATS.forEach(c=>{
@@ -542,7 +542,7 @@ renderList(){
 this.renderCatFilter();
 const q=$('searchInput').value.toLowerCase().trim();
 let filtered=this.words.filter(w=>w.kanji.toLowerCase().includes(q)||(w.kana||w.reading||'').toLowerCase().includes(q)||(w.romaji||'').toLowerCase().includes(q)||w.meaning.toLowerCase().includes(q));
-if(this.activeCategory!=='全部')filtered=filtered.filter(w=>(w.category||'其他')===this.activeCategory);
+if(this.activeCategory!=='全部')filtered=filtered.filter(w=>Array.isArray(w.category)?w.category.includes(this.activeCategory):(w.category||'其他')===this.activeCategory);
 $('statsText').textContent=this.words.length+' 词';
 if(!filtered.length){$('wordGrid').innerHTML='';$('wordGrid').style.display='none';$('wordTable').style.display='none';$('emptyMsg').style.display='block';return;}
 $('emptyMsg').style.display='none';
@@ -556,7 +556,7 @@ tr.innerHTML='<td><span class="td-speak" data-kanji="'+escHtml(w.kanji)+'" title
 '<td class="td-kana">'+escHtml(w.kana||w.reading||'')+'</td>'+
 '<td class="td-romaji">'+escHtml(w.romaji||'')+'</td>'+
 '<td class="td-meaning">'+escHtml(w.meaning)+'</td>'+
-'<td><span class="td-cat">'+escHtml(w.category||'')+'</span></td>'+
+'<td><span class="td-cat">'+escHtml(Array.isArray(w.category)?w.category.join(', '):(w.category||''))+'</span></td>'+
 '<td>'+(w.related&&w.related.length?'<span class="td-related" data-related="'+escHtml(w.related[0].word)+'">🔗'+escHtml(w.related[0].word)+'</span>':'')+'</td>'+
 '<td class="td-date">'+escHtml(w.added||'')+'</td>';
 frag.appendChild(tr);});
@@ -571,7 +571,7 @@ card.innerHTML=
 '<div class="top-row"><div class="kanji">'+escHtml(w.kanji)+'</div><button class="speak-btn" data-kanji="'+escHtml(w.kanji)+'" title="朗读">🔊</button></div>'+
 '<div class="reading">'+escHtml(w.kana||w.reading)+'</div>'+
 '<div class="romaji">'+escHtml(w.romaji||'')+'</div>'+
-'<div class="meaning">'+escHtml(w.meaning)+(w.category?'<span class="cat-tag">'+escHtml(w.category)+'</span>':'')+'</div>';
+'<div class="meaning">'+escHtml(w.meaning)+(w.category?'<span class="cat-tag">'+escHtml(Array.isArray(w.category)?w.category.join(', '):w.category)+'</span>':'')+'</div>';
 frag.appendChild(card);});
 $('wordGrid').innerHTML='';$('wordGrid').appendChild(frag);
 $('wordGrid').querySelectorAll('.speak-btn').forEach(el=>el.addEventListener('click',()=>speak(el.dataset.kanji)));

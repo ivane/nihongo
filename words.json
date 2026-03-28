@@ -4,7 +4,9 @@
     "kana": "くがつ",
     "romaji": "kugatsu",
     "meaning": "九月",
-    "category": "日期",
+    "category": [
+      "日期"
+    ],
     "examples": [
       {
         "jp": "九月に日本へ行きます。",
@@ -39,7 +41,9 @@
     "kana": "にちようび",
     "romaji": "nichiyoubi",
     "meaning": "星期天",
-    "category": "日期",
+    "category": [
+      "日期"
+    ],
     "examples": [
       {
         "jp": "日曜日は友達と遊びます。",
@@ -74,7 +78,10 @@
     "kana": "ちかてつ",
     "romaji": "chikatetsu",
     "meaning": "地铁",
-    "category": "交通",
+    "category": [
+      "交通",
+      "旅游必懂"
+    ],
     "examples": [
       {
         "jp": "地下鉄で会社に行きます。",
@@ -109,7 +116,10 @@
     "kana": "きっぷ",
     "romaji": "kippu",
     "meaning": "票（车票、入场券，偏交通/传统场景）",
-    "category": "旅游必懂",
+    "category": [
+      "交通",
+      "旅游必懂"
+    ],
     "related": [
       {
         "word": "チケット",
@@ -152,7 +162,10 @@
     "kana": "ちけっと",
     "romaji": "chiketto",
     "meaning": "票（演唱会、电影、活动门票，偏娱乐/现代场景）",
-    "category": "旅游必懂",
+    "category": [
+      "交通",
+      "旅游必懂"
+    ],
     "related": [
       {
         "word": "切符",
@@ -195,7 +208,9 @@
     "kana": "しろ",
     "romaji": "shiro",
     "meaning": "白色、白色的",
-    "category": "日常",
+    "category": [
+      "日常"
+    ],
     "related": [
       {
         "word": "白い（しろい）",
@@ -238,7 +253,9 @@
     "kana": "あおい",
     "romaji": "aoi",
     "meaning": "蓝色的、青色的",
-    "category": "日常",
+    "category": [
+      "日常"
+    ],
     "related": [
       {
         "word": "赤",
@@ -281,7 +298,9 @@
     "kana": "まいにち",
     "romaji": "mainichi",
     "meaning": "每天",
-    "category": "日常",
+    "category": [
+      "日期"
+    ],
     "examples": [
       {
         "jp": "毎日日本語を勉強しています。",
@@ -316,7 +335,9 @@
     "kana": "げつようび",
     "romaji": "getsuyoubi",
     "meaning": "星期一",
-    "category": "日期",
+    "category": [
+      "日期"
+    ],
     "examples": [
       {
         "jp": "月曜日は学校があります。",
@@ -351,7 +372,9 @@
     "kana": "かようび",
     "romaji": "kayoubi",
     "meaning": "星期二",
-    "category": "日期",
+    "category": [
+      "日期"
+    ],
     "examples": [
       {
         "jp": "火曜日に日本語のクラスがあります。",
@@ -386,7 +409,9 @@
     "kana": "すいようび",
     "romaji": "suiyoubi",
     "meaning": "星期三",
-    "category": "日期",
+    "category": [
+      "日期"
+    ],
     "examples": [
       {
         "jp": "水曜日は半日勤務です。",
@@ -421,7 +446,9 @@
     "kana": "もくようび",
     "romaji": "mokuyoubi",
     "meaning": "星期四",
-    "category": "日期",
+    "category": [
+      "日期"
+    ],
     "examples": [
       {
         "jp": "木曜日は英語のクラスがあります。",
@@ -456,7 +483,9 @@
     "kana": "きんようび",
     "romaji": "kinyoubi",
     "meaning": "星期五",
-    "category": "日期",
+    "category": [
+      "日期"
+    ],
     "examples": [
       {
         "jp": "金曜日の夜は飲みに行きます。",
@@ -491,7 +520,9 @@
     "kana": "どようび",
     "romaji": "doyoubi",
     "meaning": "星期六",
-    "category": "日期",
+    "category": [
+      "日期"
+    ],
     "examples": [
       {
         "jp": "土曜日は何をしますか。",
@@ -526,7 +557,9 @@
     "kana": "ひとつ",
     "romaji": "hitotsu",
     "meaning": "一个（通用量词）",
-    "category": "数字",
+    "category": [
+      "日常"
+    ],
     "examples": [
       {
         "jp": "りんごを一つください。",
@@ -561,7 +594,9 @@
     "kana": "ふたつ",
     "romaji": "futatsu",
     "meaning": "两个（通用量词）",
-    "category": "数字",
+    "category": [
+      "日常"
+    ],
     "examples": [
       {
         "jp": "りんごを二つください。",
@@ -596,7 +631,9 @@
     "kana": "みっつ",
     "romaji": "mittsu",
     "meaning": "三个（通用量词）",
-    "category": "数字",
+    "category": [
+      "日常"
+    ],
     "examples": [
       {
         "jp": "おにぎりを三つください。",
@@ -631,7 +668,9 @@
     "kana": "よっつ",
     "romaji": "yottsu",
     "meaning": "四个（通用量词）",
-    "category": "数字",
+    "category": [
+      "日常"
+    ],
     "examples": [
       {
         "jp": "この季節は桜が四つ咲いています。",
@@ -666,7 +705,9 @@
     "kana": "いつつ",
     "romaji": "itsutsu",
     "meaning": "五个（通用量词）",
-    "category": "数字",
+    "category": [
+      "日常"
+    ],
     "examples": [
       {
         "jp": "いちごを五つください。",
@@ -701,7 +742,9 @@
     "kana": "むっつ",
     "romaji": "muttsu",
     "meaning": "六个（通用量词）",
-    "category": "数字",
+    "category": [
+      "日常"
+    ],
     "examples": [
       {
         "jp": "卵を六つください。",
@@ -736,7 +779,9 @@
     "kana": "ななつ",
     "romaji": "nanatsu",
     "meaning": "七个（通用量词）",
-    "category": "数字",
+    "category": [
+      "日常"
+    ],
     "examples": [
       {
         "jp": "さくらんぼを七つください。",
@@ -771,7 +816,10 @@
     "kana": "すし",
     "romaji": "sushi",
     "meaning": "寿司",
-    "category": "食物",
+    "category": [
+      "食物",
+      "旅游必懂"
+    ],
     "examples": [
       {
         "jp": "すしを食べたいです。",
@@ -806,7 +854,9 @@
     "kana": "いしゃ",
     "romaji": "isha",
     "meaning": "医生、医师",
-    "category": "日常",
+    "category": [
+      "日常"
+    ],
     "examples": [
       {
         "jp": "医者に行きます。",
@@ -841,7 +891,9 @@
     "kana": "やすい",
     "romaji": "yasashii",
     "meaning": "温柔的、和蔼的、亲切的",
-    "category": "日常",
+    "category": [
+      "日常"
+    ],
     "examples": [
       {
         "jp": "あの店の人はとても優しいです。",
@@ -890,7 +942,9 @@
     "kana": "かっこいい",
     "romaji": "kakkoii",
     "meaning": "帅的，好酷的，好帅气的",
-    "category": "日常",
+    "category": [
+      "日常"
+    ],
     "examples": [
       {
         "jp": "あの俳優はかっこいい！",
@@ -939,7 +993,9 @@
     "kana": "せんせい",
     "romaji": "sensei",
     "meaning": "老师、先生、医生（尊称）",
-    "category": "日常",
+    "category": [
+      "日常"
+    ],
     "examples": [
       {
         "jp": "日本語の老师は優しいです。",
@@ -988,7 +1044,10 @@
     "kana": "ひと",
     "romaji": "hito",
     "meaning": "人、人类",
-    "category": "日常",
+    "category": [
+      "日常",
+      "旅游必懂"
+    ],
     "examples": [
       {
         "jp": "日本人は親切な人が多いです。",
@@ -1037,7 +1096,9 @@
     "kana": "アメリカ",
     "romaji": "amerika",
     "meaning": "美国、美利坚合众国",
-    "category": "其他",
+    "category": [
+      "其他"
+    ],
     "examples": [
       {
         "jp": "アメリカに行いたいです。",
@@ -1086,7 +1147,9 @@
     "kana": "おおきい",
     "romaji": "ookii",
     "meaning": "大的，巨大的",
-    "category": "日常",
+    "category": [
+      "日常"
+    ],
     "examples": [
       {
         "jp": "大きい荷物はこちらです。",
@@ -1135,7 +1198,10 @@
     "kana": "てぶくろ",
     "romaji": "tebukuro",
     "meaning": "手套",
-    "category": "日常",
+    "category": [
+      "日常",
+      "旅游必懂"
+    ],
     "examples": [
       {
         "jp": "冬の旅行に手袋が必要です。",
@@ -1184,7 +1250,9 @@
     "kana": "ブラジル",
     "romaji": "burajiru",
     "meaning": "巴西",
-    "category": "其他",
+    "category": [
+      "其他"
+    ],
     "examples": [
       {
         "jp": "ブラジルの世界遺産に行きたいです。",
@@ -1233,7 +1301,10 @@
     "kana": "にほん",
     "romaji": "nihon",
     "meaning": "日本",
-    "category": "旅游必懂",
+    "category": [
+      "旅游必懂",
+      "其他"
+    ],
     "examples": [
       {
         "jp": "日本に行きたいです。",
@@ -1276,7 +1347,10 @@
     "kana": "デパート",
     "romaji": "depaato",
     "meaning": "百货商店、百货大楼",
-    "category": "旅游必懂",
+    "category": [
+      "旅游必懂",
+      "日常"
+    ],
     "examples": [
       {
         "jp": "デパートでお買い物したいです。",
@@ -1319,7 +1393,10 @@
     "kana": "かばん",
     "romaji": "kaban",
     "meaning": "包、箱子、行李",
-    "category": "旅游必懂",
+    "category": [
+      "旅游必懂",
+      "日常"
+    ],
     "examples": [
       {
         "jp": "鞄をロッカーに入れます。",
@@ -1368,7 +1445,9 @@
     "kana": "しろい",
     "romaji": "shiroi",
     "meaning": "白色的",
-    "category": "日常",
+    "category": [
+      "日常"
+    ],
     "examples": [
       {
         "jp": "白い雲がきれいです。",
@@ -1411,7 +1490,10 @@
     "kana": "こーと",
     "romaji": "kooto",
     "meaning": "外套、大衣",
-    "category": "日常",
+    "category": [
+      "日常",
+      "旅游必懂"
+    ],
     "examples": [
       {
         "jp": "冬はコートが必要です。",
