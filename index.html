@@ -218,7 +218,8 @@ let ttsConfig = {
   rate: parseFloat(localStorage.getItem('ttsRate')) || 0.85,
   pitch: parseFloat(localStorage.getItem('ttsPitch')) || 1.0,
   azureKey: localStorage.getItem('ttsAzureKey') || '',
-  azureRegion: localStorage.getItem('ttsAzureRegion') || 'eastus'
+  azureRegion: localStorage.getItem('ttsAzureRegion') || 'eastus',
+  azureVoice: localStorage.getItem('ttsAzureVoice') || 'ja-JP-KeitaNeural'
 };
 let nativeVoice = null;
 
@@ -269,8 +270,8 @@ async function speakAzure(text) {
     if (!tokenRes.ok) { console.error('Token request failed:', tokenRes.status); speakNative(text); return; }
     const token = await tokenRes.text();
     
-    // Try standard voice first, fallback to Neural
-    const voice = 'ja-JP-MayuNeural';
+    // Use selected voice from settings
+    const voice = ttsConfig.azureVoice;
     const ssml = `<speak version='1.0' xmlns="http://www.w3.org/2001/10/synthesis" xml:lang='ja-JP'><voice name='${voice}'>${text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</voice></speak>`;
     console.log('Azure SSML:', ssml);
     
@@ -321,6 +322,14 @@ function showTtsSettings() {
           <input type="password" id="azureKeyInput" value="${ttsConfig.azureKey}" placeholder="粘贴 Azure API Key" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);margin-bottom:.5rem">
           <label style="display:block;margin-bottom:.5rem;font-size:.85rem;color:var(--text-secondary)">Region</label>
           <input type="text" id="azureRegionInput" value="${ttsConfig.azureRegion}" placeholder="eastus" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);margin-bottom:.5rem">
+          <label style="display:block;margin-bottom:.5rem;font-size:.85rem;color:var(--text-secondary)">语音</label>
+          <select id="azureVoiceInput" style="width:100%;padding:.5rem;border-radius:8px;border:1px solid var(--border);margin-bottom:.5rem">
+            <option value="ja-JP-KeitaNeural">🎧 Keita (男声)</option>
+            <option value="ja-JP-DaichiNeural">🎧 Daichi (男声)</option>
+            <option value="ja-JP-MayuNeural">🎧 Mayu (女声)</option>
+            <option value="ja-JP-NanamiNeural">🎧 Nanami (女声)</option>
+            <option value="ja-JP-AoiNeural">🎧 Aoi (女声)</option>
+          </select>
           <a href="https://portal.azure.com/" target="_blank" style="font-size:.75rem;color:var(--accent)">获取 Azure TTS Key →</a>
         </div>
         <label style="display:block;margin-bottom:.5rem;font-size:.85rem;color:var(--text-secondary)">语速: <span id="rateVal">${ttsConfig.rate}</span></label>
@@ -337,6 +346,7 @@ function showTtsSettings() {
   const azureFields = document.getElementById('azureFields');
   const azureKeyInput = document.getElementById('azureKeyInput');
   const azureRegionInput = document.getElementById('azureRegionInput');
+  const azureVoiceInput = document.getElementById('azureVoiceInput');
   const rateSlider = document.getElementById('rateSlider');
   const pitchSlider = document.getElementById('pitchSlider');
   const rateVal = document.getElementById('rateVal');
@@ -346,6 +356,7 @@ function showTtsSettings() {
   
   engineSelect.value = ttsConfig.engine;
   azureFields.style.display = ttsConfig.engine === 'azure' ? 'block' : 'none';
+  azureVoiceInput.value = ttsConfig.azureVoice;
   
   engineSelect.addEventListener('change', () => {
     ttsConfig.engine = engineSelect.value;
@@ -361,6 +372,11 @@ function showTtsSettings() {
   azureRegionInput.addEventListener('input', () => {
     ttsConfig.azureRegion = azureRegionInput.value;
     localStorage.setItem('ttsAzureRegion', azureRegionInput.value);
+  });
+  
+  azureVoiceInput.addEventListener('change', () => {
+    ttsConfig.azureVoice = azureVoiceInput.value;
+    localStorage.setItem('ttsAzureVoice', azureVoiceInput.value);
   });
   
   rateSlider.addEventListener('input', () => {
