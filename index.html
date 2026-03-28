@@ -266,12 +266,22 @@ async function speakAzure(text) {
       method: 'POST',
       headers: { 'Ocp-Apim-Subscription-Key': ttsConfig.azureKey, 'Content-Type': 'application/x-www-form-urlencoded' }
     });
-    if (!tokenRes.ok) { speakNative(text); return; }
+    if (!tokenRes.ok) { console.error('Token request failed:', tokenRes.status); speakNative(text); return; }
     const token = await tokenRes.text();
-    const ssml = `<speak version='1.0' xmlns="http://www.w3.org/2001/10/synthesis" xml:lang='ja-JP'><voice name='ja-JP-NanamiNeural'>${text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</voice></speak>`;
+    
+    // Try standard voice first, fallback to Neural
+    const voice = 'ja-JP-MayuNeural';
+    const ssml = `<speak version='1.0' xmlns="http://www.w3.org/2001/10/synthesis" xml:lang='ja-JP'><voice name='${voice}'>${text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</voice></speak>`;
+    console.log('Azure SSML:', ssml);
+    
     const audioRes = await fetch(`https://${ttsConfig.azureRegion}.tts.speech.microsoft.com/cognitiveservices/v1`, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/ssml+xml', 'Ocp-Apim-Subscription-Region': ttsConfig.azureRegion },
+      headers: { 
+        'Authorization': `Bearer ${token}`, 
+        'Content-Type': 'application/ssml+xml', 
+        'Ocp-Apim-Subscription-Region': ttsConfig.azureRegion,
+        'X-Microsoft-OutputFormat': 'audio-16khz-128kbitrate-mono-mp3'
+      },
       body: ssml
     });
     if (audioRes.ok) {
@@ -282,7 +292,7 @@ async function speakAzure(text) {
       audio.onended = () => URL.revokeObjectURL(url);
     } else {
       const errorText = await audioRes.text();
-      console.error('Azure TTS audio request failed:', audioRes.status, audioRes.statusText, errorText);
+      console.error('Azure TTS failed:', audioRes.status, audioRes.statusText, errorText);
       speakNative(text);
     }
   } catch (e) {
