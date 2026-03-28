@@ -299,7 +299,8 @@
     "romaji": "mainichi",
     "meaning": "每天",
     "category": [
-      "日期"
+      "日期",
+      "日常"
     ],
     "examples": [
       {
@@ -855,7 +856,8 @@
     "romaji": "isha",
     "meaning": "医生、医师",
     "category": [
-      "日常"
+      "日常",
+      "旅游必懂"
     ],
     "examples": [
       {
@@ -1097,7 +1099,8 @@
     "romaji": "amerika",
     "meaning": "美国、美利坚合众国",
     "category": [
-      "其他"
+      "其他",
+      "旅游必懂"
     ],
     "examples": [
       {
@@ -1251,7 +1254,8 @@
     "romaji": "burajiru",
     "meaning": "巴西",
     "category": [
-      "其他"
+      "其他",
+      "旅游必懂"
     ],
     "examples": [
       {
@@ -1303,7 +1307,8 @@
     "meaning": "日本",
     "category": [
       "旅游必懂",
-      "其他"
+      "其他",
+      "日常"
     ],
     "examples": [
       {
