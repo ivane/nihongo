@@ -557,7 +557,7 @@ tr.innerHTML='<td><span class="td-speak" data-kanji="'+escHtml(w.kanji)+'" title
 '<td class="td-romaji">'+escHtml(w.romaji||'')+'</td>'+
 '<td class="td-meaning">'+escHtml(w.meaning)+'</td>'+
 '<td><span class="td-cat">'+escHtml(w.category||'')+'</span></td>'+
-'<td>'+(w.related?'<span class="td-related" data-related="'+escHtml(w.related.word)+'">🔗'+escHtml(w.related.word)+'</span>':'')+'</td>'+
+'<td>'+(w.related&&w.related.length?'<span class="td-related" data-related="'+escHtml(w.related[0].word)+'">🔗'+escHtml(w.related[0].word)+'</span>':'')+'</td>'+
 '<td class="td-date">'+escHtml(w.added||'')+'</td>';
 frag.appendChild(tr);});
 tbody.innerHTML='';tbody.appendChild(frag);
@@ -580,11 +580,17 @@ const w=sorted[i];
 const exDiv=document.createElement('div');exDiv.className='examples';
 exDiv.appendChild(this.renderExamplesDOM(w.examples||w.example,i));
 card.appendChild(exDiv);
-if(w.related){const rel=document.createElement('div');rel.className='related';
-rel.innerHTML='<span class="rel-word" data-related="'+escHtml(w.related.word)+'">🔗 '+escHtml(w.related.word)+'（'+escHtml(w.related.kana||'')+'）</span>'+
-(w.related.difference?'<div class="rel-diff">'+escHtml(w.related.difference)+'</div>':'');
+const rels=Array.isArray(w.related)?w.related:(w.related?[w.related]:[]);
+rels.forEach(r=>{
+if(!r||!r.word)return;
+const rel=document.createElement('div');rel.className='related';
+let html='<span class="rel-word" data-related="'+escHtml(r.word)+'">🔗 '+escHtml(r.word)+'</span>';
+if(r.different)html+='<div class="rel-diff">'+escHtml(r.different)+'</div>';
+if(r.usage)html+='<div class="rel-diff">'+escHtml(r.usage)+'</div>';
+rel.innerHTML=html;
 card.appendChild(rel);
-rel.querySelector('.rel-word').addEventListener('click',()=>{$('searchInput').value=w.related.word;this.renderList();});}
+rel.querySelector('.rel-word').addEventListener('click',()=>{$('searchInput').value=r.word;this.renderList();});
+});
 if(w.added){const dt=document.createElement('div');dt.className='date';dt.textContent=w.added;card.appendChild(dt);}
 });}
 },
