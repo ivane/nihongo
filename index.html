@@ -83,6 +83,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .word-card .related .rel-word:hover{opacity:.75;text-decoration:underline}
 .word-card .related .rel-diff{color:var(--dim);font-size:.8rem;margin-top:.25rem}
 .word-card .date{color:var(--dim);font-size:.73rem;margin-top:.6rem;text-align:right}
+.word-card .rating-bar{display:flex;gap:.35rem;margin-top:.6rem;align-items:center}
+.word-card .rating-label{font-size:.72rem;color:var(--dim);margin-right:.15rem}
+.word-card .rating-btn{padding:3px 8px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--dim);font-size:.72rem;cursor:pointer;transition:all .2s;font-weight:500}
+.word-card .rating-btn:hover{border-color:var(--accent);color:var(--accent)}
+.word-card .rating-btn.active-r0{background:var(--red-bg);color:var(--red);border-color:var(--red)}
+.word-card .rating-btn.active-r1{background:var(--yellow-bg);color:var(--yellow);border-color:var(--yellow)}
+.word-card .rating-btn.active-r2{background:var(--green-bg);color:var(--green);border-color:var(--green)}
 table.word-table{width:100%;border-collapse:collapse;font-size:.88rem;border-radius:12px;overflow:hidden}
 table.word-table thead{position:sticky;top:0;z-index:1}
 table.word-table th{background:var(--accent2);color:var(--text);padding:.65rem .55rem;text-align:left;font-weight:600;white-space:nowrap;font-size:.82rem;letter-spacing:.02em}
@@ -591,6 +598,15 @@ rel.innerHTML=html;
 card.appendChild(rel);
 rel.querySelector('.rel-word').addEventListener('click',()=>{$('searchInput').value=r.word;this.renderList();});
 });
+if(w.added||true){const rating=JSON.parse(localStorage.getItem('wRating')||'{}');
+const rVal=rating[w.kanji]??null;
+const rBar=document.createElement('div');rBar.className='rating-bar';
+rBar.innerHTML='<span class="rating-label">掌握：</span>';
+[{v:0,t:'不懂',c:'r0'},{v:1,t:'有点懂',c:'r1'},{v:2,t:'非常懂',c:'r2'}].forEach(opt=>{
+const btn=document.createElement('span');btn.className='rating-btn'+(rVal===opt.v?' active-'+opt.c:'');btn.textContent=opt.t;
+btn.addEventListener('click',()=>{rating[w.kanji]=opt.v;localStorage.setItem('wRating',JSON.stringify(rating));
+rBar.querySelectorAll('.rating-btn').forEach(b=>b.className='rating-btn');btn.classList.add('active-'+opt.c);});rBar.appendChild(btn);});
+card.appendChild(rBar);}
 if(w.added){const dt=document.createElement('div');dt.className='date';dt.textContent=w.added;card.appendChild(dt);}
 });}
 },
