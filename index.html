@@ -223,6 +223,11 @@ let ttsConfig = {
 };
 let nativeVoice = null;
 
+// Prefetch Azure token on page load if using Azure
+if (ttsConfig.engine === 'azure' && ttsConfig.azureKey) {
+  getAzureToken(); // fire and forget, will be cached
+}
+
 // Initialize TTS - find best Japanese voice
 function initTTS() {
   if (!('speechSynthesis' in window)) return;
