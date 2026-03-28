@@ -268,7 +268,7 @@ async function speakAzure(text) {
     });
     if (!tokenRes.ok) { speakNative(text); return; }
     const token = await tokenRes.text();
-    const ssml = `<speak version='1.0' xml:lang='ja-JP'><voice name='ja-JP-NanamiNeural'>${text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</voice></speak>`;
+    const ssml = `<speak version='1.0' xmlns="http://www.w3.org/2001/10/synthesis" xml:lang='ja-JP'><voice name='ja-JP-NanamiNeural'>${text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</voice></speak>`;
     const audioRes = await fetch(`https://${ttsConfig.azureRegion}.tts.speech.microsoft.com/cognitiveservices/v1`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/ssml+xml', 'Ocp-Apim-Subscription-Region': ttsConfig.azureRegion },
@@ -281,9 +281,11 @@ async function speakAzure(text) {
       audio.play();
       audio.onended = () => URL.revokeObjectURL(url);
     } else {
+      console.error('Azure TTS audio request failed:', audioRes.status, audioRes.statusText);
       speakNative(text);
     }
   } catch (e) {
+    console.error('Azure TTS error:', e);
     speakNative(text);
   }
 }
