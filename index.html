@@ -260,20 +260,28 @@ function speakNative(text) {
 }
 
 // Azure TTS via REST API
-async function speakAzure(text) {
+let azureToken = { token: null, expires: 0 };
+
+async function getAzureToken() {
+  if (azureToken.token && Date.now() < azureToken.expires) {
+    return azureToken.token;
+  }
   const tokenUrl = `https://${ttsConfig.azureRegion}.api.cognitive.microsoft.com/sts/v1.0/issueToken`;
+  const tokenRes = await fetch(tokenUrl, {
+    method: 'POST',
+    headers: { 'Ocp-Apim-Subscription-Key': ttsConfig.azureKey, 'Content-Type': 'application/x-www-form-urlencoded' }
+  });
+  if (!tokenRes.ok) throw new Error('Token request failed');
+  azureToken.token = await tokenRes.text();
+  azureToken.expires = Date.now() + 9 * 60 * 1000; // cache for 9 minutes
+  return azureToken.token;
+}
+
+async function speakAzure(text) {
   try {
-    const tokenRes = await fetch(tokenUrl, {
-      method: 'POST',
-      headers: { 'Ocp-Apim-Subscription-Key': ttsConfig.azureKey, 'Content-Type': 'application/x-www-form-urlencoded' }
-    });
-    if (!tokenRes.ok) { console.error('Token request failed:', tokenRes.status); speakNative(text); return; }
-    const token = await tokenRes.text();
-    
-    // Use selected voice from settings
+    const token = await getAzureToken();
     const voice = ttsConfig.azureVoice;
     const ssml = `<speak version='1.0' xmlns="http://www.w3.org/2001/10/synthesis" xml:lang='ja-JP'><voice name='${voice}'>${text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</voice></speak>`;
-    console.log('Azure SSML:', ssml);
     
     const audioRes = await fetch(`https://${ttsConfig.azureRegion}.tts.speech.microsoft.com/cognitiveservices/v1`, {
       method: 'POST',
@@ -298,6 +306,7 @@ async function speakAzure(text) {
     }
   } catch (e) {
     console.error('Azure TTS error:', e);
+    azureToken = { token: null, expires: 0 }; // reset token on error
     speakNative(text);
   }
 }
