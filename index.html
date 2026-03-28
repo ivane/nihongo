@@ -281,7 +281,8 @@ async function speakAzure(text) {
       audio.play();
       audio.onended = () => URL.revokeObjectURL(url);
     } else {
-      console.error('Azure TTS audio request failed:', audioRes.status, audioRes.statusText);
+      const errorText = await audioRes.text();
+      console.error('Azure TTS audio request failed:', audioRes.status, audioRes.statusText, errorText);
       speakNative(text);
     }
   } catch (e) {
